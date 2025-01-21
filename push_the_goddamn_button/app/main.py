@@ -2,7 +2,7 @@ from fasthtml.common import *
 from fasthtml.svg import *
 import uvicorn
 
-app,rt,counts,Count = fast_app('data/counts.db', live=True, 
+app,rt,counts,Count = fast_app('app/data/counts.db', live=True, 
     hdrs=[Style(':root { --pico-font-size: 100%; }')],
     id=int, value=int, pk='id')
 
