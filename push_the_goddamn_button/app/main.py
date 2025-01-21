@@ -1,12 +1,8 @@
 from fasthtml.common import *
 from fasthtml.svg import *
 import uvicorn
-import asyncio
 
-
-app,rt,counts,Count = fast_app('count.db', live=True,
-                                hdrs=[Style(':root { --pico-font-size: 100%; }')],
-                                id=int, value=int, pk='id')
+app,rt = fast_app(hdrs=[Style(':root { --pico-font-size: 100%; }')], live=True)
 
 count = 0
 
@@ -36,3 +32,4 @@ def get():
 
 if __name__ == '__main__':
     uvicorn.run(app, host='0.0.0.0', port=int(os.getenv("PORT", default=8000)))
+    
