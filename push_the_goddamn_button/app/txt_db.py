@@ -4,7 +4,6 @@ import uvicorn
 
 app,rt = fast_app(hdrs=[Style(':root { --pico-font-size: 100%; }')], live=True)
 
-
 @rt('/')
 def get():
     count = int(open('app/data/count.txt', 'r').read())
@@ -30,4 +29,4 @@ def get():
     return P(f'The goddamn button has been pushed {count}x')
 
 uvicorn.run(app, host='0.0.0.0', port=int(os.getenv("PORT", default=8000)))
-    
+
