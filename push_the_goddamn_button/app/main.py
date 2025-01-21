@@ -4,10 +4,10 @@ import uvicorn
 
 app,rt = fast_app(hdrs=[Style(':root { --pico-font-size: 100%; }')], live=True)
 
-count = 0
 
 @rt('/')
 def get():
+    count = int(open('data/count.txt', 'r').read())
     button = Svg(w=100, h=100)(
         Circle(
             20, 25, 25, 
@@ -24,9 +24,8 @@ def get():
 
 @rt('/increment/')
 def get():
-    global count
-    
-    count += 1
+    count = int(open('data/count.txt', 'r').read()) + 1
+    open('data/count.txt', 'w').write(str(count))
 
     return P(f'The goddamn button has been pushed {count}x')
 
