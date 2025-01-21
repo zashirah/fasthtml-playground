@@ -25,7 +25,7 @@ def get():
 @rt('/increment/')
 def get():
     count = int(open('app/data/count.txt', 'r').read()) + 1
-    open('data/count.txt', 'w').write(str(count))
+    open('app/data/count.txt', 'w').write(str(count))
 
     return P(f'The goddamn button has been pushed {count}x')
 
