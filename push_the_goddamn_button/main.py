@@ -13,7 +13,7 @@ def get():
     
     count = counts[1]
 
-    button = Svg(w=100, h=100)(
+    button = Svg(w=50, h=50)(
         Circle(
             20, 25, 25, 
             stroke='red', 
@@ -24,8 +24,10 @@ def get():
 
     title = 'PUSH THE GODDAMN BUTTON!'
 
+    img = Div(Img(src='pushthegdbutton.jpeg'))
+
     button_presses = P(f'The goddamn button has been pushed {count.value}x', id='count')
-    return Title(title), Main(H1(title), button, button_presses)
+    return Title(title), Main(H1(title), img, button, button_presses)
 
 @rt('/increment/{cid}')
 def get(cid:int):
@@ -34,5 +36,7 @@ def get(cid:int):
     counts.update(count)
     return P(f'The goddamn button has been pushed {count.value}x')
 
-if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=int(os.getenv("PORT", default=8000)))
+# if __name__ == '__main__':
+#     uvicorn.run(app, host='0.0.0.0', port=int(os.getenv("PORT", default=8000)))
+
+serve()
