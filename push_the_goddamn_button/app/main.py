@@ -1,7 +1,12 @@
 from fasthtml.common import *
 from fasthtml.svg import *
+import uvicorn
+import asyncio
 
-app,rt = fast_app(hdrs=[Style(':root { --pico-font-size: 100%; }')], live=True)
+
+app,rt,counts,Count = fast_app('count.db', live=True,
+                                hdrs=[Style(':root { --pico-font-size: 100%; }')],
+                                id=int, value=int, pk='id')
 
 count = 0
 
@@ -29,4 +34,5 @@ def get():
 
     return P(f'The goddamn button has been pushed {count}x')
 
-serve()
+if __name__ == '__main__':
+    uvicorn.run(app, host='0.0.0.0', port=int(os.getenv("PORT", default=8000)))
