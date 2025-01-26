@@ -18,9 +18,10 @@ def update_image(pg13):
     return Div(Img(src=img_name, hx_swap_oob='true', id='image'))
 
 def update_counter_txt(pg13):
-    if pg13: txt = ' goddamn'
-    else: txt = ''
-    return P(f'The{txt} button has been pushed {count.value}x', hx_swap_oob='true', id='count')
+    return P(f"The{' goddamn' if pg13 else ''} button has been pushed {count.value}x", hx_swap_oob='true', id='count')
+
+def update_title(pg13):
+    return H1(f'PUSH THE{" GODDAMN" if pg13 else ""} BUTTON!', id='title')
         
 @rt('/')
 def get():
@@ -44,7 +45,7 @@ def get():
 
     button_presses = update_counter_txt(pg13)
 
-    title_h = H1(title, id='title')
+    title_h = update_title(pg13)
 
     return Title(title), Main(title_h, pg13_toggle, update_image(pg13), button, button_presses, cls='main')
 
@@ -67,8 +68,7 @@ async def ws(msg:str, send):
 def get():
     global pg13
     pg13 = not pg13
-    title = f'PUSH THE {"GODDAMN" if pg13 else "GD"} BUTTON!'
-    return H1(title), update_image(pg13), update_counter_txt(pg13)
+    return update_title(pg13), update_image(pg13), update_counter_txt(pg13)
 
 if __name__ == '__main__':
     serve()
