@@ -9,9 +9,26 @@ app,rt,counts,Count = fast_app('data/counts.db', live=True,
 try: counts[1]
 except: counts.insert(Count(value=0))
 count = counts[1]
+pg13 = False
 
+def update_image(pg13):
+    if pg13: img_name = 'pushthegdbutton.jpeg'
+    else: img_name = 'pushthebutton.jpeg'
+
+    return Div(Img(src=img_name, hx_swap_oob='true', id='image'))
+
+def update_counter_txt(pg13):
+    if pg13: txt = ' goddamn'
+    else: txt = ''
+    return P(f'The{txt} button has been pushed {count.value}x', hx_swap_oob='true', id='count')
+        
 @rt('/')
 def get():
+    pg13_toggle = Label(
+        "I want to see the PG-13 version", 
+        Input(type='checkbox', role='switch', hx_get='/pg13', target_id='title')
+    )
+
     button = Div(Svg(w=50, h=50)(
         Circle(
             20, 25, 25, 
@@ -22,27 +39,36 @@ def get():
         hx_ext='ws',
         ws_connect='/ws'
     )
+    
+    title = f'PUSH THE{" GODDAMN" if pg13 else ""} BUTTON!'
 
-    title = 'PUSH THE GODDAMN BUTTON!'
+    button_presses = update_counter_txt(pg13)
 
-    img = Div(Img(src='pushthegdbutton.jpeg'))
+    title_h = H1(title, id='title')
 
-    button_presses = P(f'The goddamn button has been pushed {count.value}x', id='count')
-    return Title(title), Main(H1(title), img, button, button_presses)
+    return Title(title), Main(title_h, pg13_toggle, update_image(pg13), button, button_presses, cls='main')
 
 users = {}
 def on_conn(ws, send): users[str(id(ws))] = send
 def on_disconn(ws): users.pop(str(id(ws)), None)
 
 async def update_count():
+    global pg13
     for u in users.values(): 
-        await u(P(f'The goddamn button has been pushed {count.value}x', id='count'))
+        await u(update_counter_txt(pg13))
 
 @app.ws('/ws', conn=on_conn, disconn=on_disconn)
 async def ws(msg:str, send): 
     count.value = count.value + 1
     counts.update(count)
     await update_count()
+
+@rt('/pg13')
+def get():
+    global pg13
+    pg13 = not pg13
+    title = f'PUSH THE {"GODDAMN" if pg13 else "GD"} BUTTON!'
+    return H1(title), update_image(pg13), update_counter_txt(pg13)
 
 if __name__ == '__main__':
     serve()
