@@ -1,8 +1,16 @@
 from fasthtml.common import *
 from fasthtml.svg import *
 
+
+css = Style('''
+article { text-align: center }
+img { height: 200px }
+button { height: 75px; width: 150px; margin: 10px; padding: 1px}
+header { text-align: center }
+''')
+
 app,rt,counts,Count = fast_app('data/counts.db', live=True, 
-    hdrs=[Style(':root { --pico-font-size: 100%; }')],
+    hdrs=[Style(':root { --pico-font-size: 100%; }'), css],
     id=int, value=int, pk='id',
     exts='ws'
 )
@@ -11,64 +19,47 @@ except: counts.insert(Count(value=0))
 count = counts[1]
 pg13 = False
 
-def update_image(pg13):
-    if pg13: img_name = 'pushthegdbutton.jpeg'
-    else: img_name = 'pushthebutton.jpeg'
+def update_image(pg13): return Div(Img(src=f'pushthe{"gd" if pg13 else ""}button.jpeg'), hx_swap_oob='true', id='image')
 
-    return Div(Img(src=img_name, hx_swap_oob='true', id='image'))
+def update_count(): return B(count.value, id='count', style='text-align: left')
+    
+def update_counter_txt(pg13): return Div(f"Number of{' goddamn' if pg13 else ''} button pushes: ", hx_swap_oob='true', id='counter_txt')
 
-def update_counter_txt(pg13):
-    return P(f"The{' goddamn' if pg13 else ''} button has been pushed {count.value}x", hx_swap_oob='true', id='count')
+def update_title(pg13): return H1(f'PUSH THE{" GODDAMN" if pg13 else ""} BUTTON!', hx_swap_oob='true', id='title')
 
-def update_title(pg13):
-    return H1(f'PUSH THE{" GODDAMN" if pg13 else ""} BUTTON!', id='title')
-        
+def update_button(pg13): return Div(Button(f"this {'goddamn ' if pg13 else ''}button", id='goddamn_btn', hx_swap_oob='true', ws_send=True), hx_ext='ws', ws_connect='/ws')
+
 @rt('/')
 def get():
     pg13_toggle = Label(
         "I want to see the PG-13 version", 
-        Input(type='checkbox', role='switch', hx_get='/pg13', target_id='title')
+        Input(type='checkbox', role='switch', hx_get='/pg13')
     )
 
-    button = Div(Svg(w=50, h=50)(
-        Circle(
-            20, 25, 25, 
-            stroke='red', 
-            stroke_width=3,
-            id='goddamn_btn',
-            ws_send=True)),
-        hx_ext='ws',
-        ws_connect='/ws'
-    )
-    
-    title = f'PUSH THE{" GODDAMN" if pg13 else ""} BUTTON!'
+    button_push_txt = update_counter_txt(pg13)
 
-    button_presses = update_counter_txt(pg13)
+    button_push_ct = update_count()
 
     title_h = update_title(pg13)
 
-    return Title(title), Main(title_h, pg13_toggle, update_image(pg13), button, button_presses, cls='main')
+    header = Grid(title_h, pg13_toggle)
+
+    return Title("PUSH THE BUTTON"), Main(Header(header), Card(update_image(pg13), update_button(pg13), Div(button_push_txt, button_push_ct)))
 
 users = {}
 def on_conn(ws, send): users[str(id(ws))] = send
 def on_disconn(ws): users.pop(str(id(ws)), None)
 
-async def update_count():
-    global pg13
-    for u in users.values(): 
-        await u(update_counter_txt(pg13))
-
 @app.ws('/ws', conn=on_conn, disconn=on_disconn)
 async def ws(msg:str, send): 
     count.value = count.value + 1
     counts.update(count)
-    await update_count()
+    for u in users.values(): await u(update_count())
 
 @rt('/pg13')
 def get():
     global pg13
     pg13 = not pg13
-    return update_title(pg13), update_image(pg13), update_counter_txt(pg13)
+    return update_title(pg13), update_image(pg13), update_counter_txt(pg13), update_button(pg13)
 
-if __name__ == '__main__':
-    serve()
+if __name__ == '__main__': serve()
