@@ -1,6 +1,7 @@
 ## to do
 
 * figure out web sockets
+    * got this working
 * persist counter
     * got this working in main.py
     * simple.py loses the count with each deploy
