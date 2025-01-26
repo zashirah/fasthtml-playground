@@ -1,8 +1,5 @@
 from fasthtml.common import *
 from fasthtml.svg import *
-import uvicorn
-
-if __name__ == "__main__": sys.exit("Run this app with `uvicorn main:app`")
 
 app,rt,counts,Count = fast_app('data/counts.db', live=True, 
     hdrs=[Style(':root { --pico-font-size: 100%; }')],
@@ -46,3 +43,6 @@ async def ws(msg:str, send):
     count.value = count.value + 1
     counts.update(count)
     await update_count()
+
+if __name__ == '__main__':
+    serve()
